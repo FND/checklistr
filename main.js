@@ -16,6 +16,8 @@ function Checklist(id, caption, items) {
 	this.id = id;
 	this.caption = caption;
 	this.items = items;
+
+	this.onChange = this.onChange.bind(this);
 }
 Checklist.fromJSON = function(id, payload) {
 	let items = payload.items.map(item => ChecklistItem.fromJSON(item));
@@ -23,10 +25,23 @@ Checklist.fromJSON = function(id, payload) {
 };
 Checklist.prototype.render = function() {
 	let dom = createElement;
-	return dom("section", null, [
+	let list = dom("section", { class: "checklist" }, [
 		dom("h3", { id: "checklist-" + this.id }, this.caption),
 		dom("ol", null, this.items.map(item => item.render("li")))
 	]);
+
+	list.addEventListener("change", this.onChange);
+
+	return list;
+};
+Checklist.prototype.onChange = function(ev) {
+	let target = ev.target;
+	let node = target.closest(".checklist-item");
+
+	item = node["checklist-item"];
+	item.done = !!target.checked;
+
+	replaceNode(node, item.render("li")); // XXX: slightly hacky due to tag name
 };
 
 function ChecklistItem(desc, done) {
@@ -37,8 +52,14 @@ ChecklistItem.fromJSON = function(payload) {
 	return new this(payload.desc, payload.done);
 };
 ChecklistItem.prototype.render = function(tag) {
+	let cls = "checklist-item";
+	let params = {
+		class: this.done ? cls + " done" : cls,
+		"checklist-item": this // XXX: memory leak?
+	};
+
 	let dom = createElement;
-	return dom(tag, null, [
+	return dom(tag, params, [
 		dom("label", null, [
 			dom("input", { type: "checkbox", checked: !!this.done }),
 			this.desc
@@ -69,6 +90,12 @@ if(!window.fetch) {
 	polyfills.push("fetch.js");
 }
 loadScripts(polyfills, init);
+
+function replaceNode(oldNode, newNode) {
+	var container = oldNode.parentNode;
+	container.insertBefore(newNode, oldNode);
+	container.removeChild(oldNode);
+};
 
 // adapted from <https://github.com/roca-components/declarative-rendering>
 function createElement(tag, params, children) {
