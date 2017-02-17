@@ -7,7 +7,13 @@ function init() {
 		then(checklists => {
 			Object.keys(checklists).forEach(id => {
 				let list = Checklist.fromJSON(id, checklists[id]);
-				document.body.appendChild(list.render());
+				let node = list.render();
+				document.body.appendChild(node);
+			});
+
+			document.body.addEventListener("checklist-update", function(ev) {
+				console.log("~~~", ev.detail, store);
+				// TODO: update store
 			});
 		});
 }
@@ -24,8 +30,13 @@ Checklist.fromJSON = function(id, payload) {
 	return new this(id, payload.caption, items);
 };
 Checklist.prototype.render = function() {
+	let params = {
+		class: "checklist",
+		checklist: this // XXX: memory leak?
+	};
+
 	let dom = createElement;
-	let list = dom("section", { class: "checklist" }, [
+	let list = dom("section", params, [
 		dom("h3", { id: "checklist-" + this.id }, this.caption),
 		dom("ol", null, this.items.map(item => item.render("li")))
 	]);
@@ -37,11 +48,15 @@ Checklist.prototype.render = function() {
 Checklist.prototype.onChange = function(ev) {
 	let target = ev.target;
 	let node = target.closest(".checklist-item");
+	let list = node.closest(".checklist");
 
 	item = node["checklist-item"];
 	item.done = !!target.checked;
 
 	replaceNode(node, item.render("li")); // XXX: slightly hacky due to tag name
+
+	// TODO: `ev.stopPropagation()` for encapsulation?
+	dispatchEvent(list, "checklist-update", { id: this.id }, { bubbles: true });
 };
 
 function ChecklistItem(desc, done) {
@@ -90,6 +105,15 @@ if(!window.fetch) {
 	polyfills.push("fetch.js");
 }
 loadScripts(polyfills, init);
+
+// `emitter` is a DOM node
+function dispatchEvent(emitter, name, payload, options = {}) {
+	if(payload) {
+		options.detail = payload;
+	}
+	let ev = new CustomEvent(name, options);
+	emitter.dispatchEvent(ev);
+}
 
 function replaceNode(oldNode, newNode) {
 	var container = oldNode.parentNode;
