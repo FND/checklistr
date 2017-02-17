@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "test": "eslint --cache *.js src && echo ✓"
+  },
   "dependencies": {
     "whatwg-fetch": "^2.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^3.15.0",
+    "eslint-config-fnd": "^1.0.3"
   }
 }
