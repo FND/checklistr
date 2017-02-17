@@ -20,8 +20,8 @@ function init() {
 			});
 
 			document.body.addEventListener("checklist-update", function(ev) {
-				console.log("~~~", ev.detail, store);
-				// TODO: update store
+				let { id, state } = ev.detail
+				store.update(id, state);
 			});
 		});
 }

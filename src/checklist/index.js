@@ -15,20 +15,22 @@ export default class Checklist {
 		return new this(id, payload.caption, items);
 	}
 
-	render() {
-		let params = {
-			class: "checklist",
-			checklist: this // XXX: memory leak?
+	toJSON() {
+		return {
+			id: this.id,
+			caption: this.caption,
+			items: this.items.map(item => item.toJSON())
 		};
+	}
 
+	render() {
 		let dom = createElement;
-		let list = dom("section", params, [
+		let list = dom("section", { class: "checklist" }, [
 			dom("h3", { id: "checklist-" + this.id }, this.caption),
 			dom("ol", null, this.items.map(item => item.render("li")))
 		]);
 
 		list.addEventListener("change", this.onChange);
-
 		return list;
 	}
 
@@ -43,6 +45,10 @@ export default class Checklist {
 		replaceNode(node, item.render("li")); // XXX: slightly hacky due to tag name
 
 		// TODO: `ev.stopPropagation()` for encapsulation?
-		dispatchEvent(list, "checklist-update", { id: this.id }, { bubbles: true });
+		let payload = {
+			id: this.id,
+			state: this.toJSON()
+		};
+		dispatchEvent(list, "checklist-update", payload, { bubbles: true });
 	}
 }

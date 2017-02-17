@@ -10,6 +10,13 @@ export default class ChecklistItem {
 		return new this(payload.desc, payload.done);
 	}
 
+	toJSON() {
+		return {
+			desc: this.desc,
+			done: this.done
+		};
+	}
+
 	render(tag) {
 		let cls = "checklist-item";
 		let params = {

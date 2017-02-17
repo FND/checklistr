@@ -5,6 +5,11 @@ export default class Store {
 		this.uri = uri;
 	}
 
+	update(id, value) {
+		this.data[id] = value;
+		return this.save();
+	}
+
 	load() {
 		return http("GET", this.uri).
 			then(res => res.json()).
