@@ -25,13 +25,13 @@ export default class Checklist {
 
 	render() {
 		let dom = createElement;
-		let list = dom("section", { class: "checklist" }, [
+		let el = dom("section", { class: "checklist" }, [
 			dom("h3", { id: "checklist-" + this.id }, this.caption),
 			dom("ol", null, this.items.map(item => item.render("li")))
 		]);
 
-		list.addEventListener("change", this.onChange);
-		return list;
+		el.addEventListener("checklist-item-update", this.onChange);
+		return el;
 	}
 
 	onChange(ev) {

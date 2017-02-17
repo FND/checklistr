@@ -7,7 +7,7 @@ export default class Store {
 
 	update(id, value) {
 		this.data[id] = value;
-		return this.save();
+		return this.save(); // TODO: debounce
 	}
 
 	load() {
