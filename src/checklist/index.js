@@ -8,7 +8,7 @@ export default class Checklist {
 		this.caption = caption;
 		this.items = items;
 
-		bindMethodContext(this, "onChange");
+		bindMethodContext(this, "onAdd", "onChange");
 	}
 
 	static fromJSON(id, payload) {
@@ -26,13 +26,24 @@ export default class Checklist {
 
 	render() {
 		let dom = createElement;
+		let btn = dom("button", null, "⊕ add");
 		let el = dom("section", { class: "checklist" }, [
 			dom("h3", { id: "checklist-" + this.id }, this.caption),
-			dom("ol", null, this.items.map(item => item.render("li")))
+			dom("ol", null, this.items.map(item => item.render("li"))),
+			btn
 		]);
 
+		btn.addEventListener("click", this.onAdd);
 		el.addEventListener("checklist-item-update", this.onChange);
 		return el;
+	}
+
+	onAdd(ev) {
+		this.items.push(new ChecklistItem());
+
+		// re-render -- FIXME: discards UI state (e.g. other items' edit mode)
+		let node = ev.target.closest(".checklist");
+		replaceNode(node, this.render());
 	}
 
 	onChange(ev) {

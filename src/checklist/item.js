@@ -3,7 +3,7 @@ import { bindMethodContext } from "../util";
 
 export default class ChecklistItem {
 	constructor(desc, done) {
-		this.desc = desc;
+		this.desc = desc || "";
 		this.done = !!done;
 
 		bindMethodContext(this, "onEdit", "onSave", "onChange");
