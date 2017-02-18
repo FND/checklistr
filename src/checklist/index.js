@@ -1,5 +1,6 @@
 import ChecklistItem from "./item";
 import { dispatchEvent, replaceNode, createElement } from "../dom";
+import { bindMethodContext } from "../util";
 
 export default class Checklist {
 	constructor(id, caption, items) {
@@ -7,7 +8,7 @@ export default class Checklist {
 		this.caption = caption;
 		this.items = items;
 
-		this.onChange = this.onChange.bind(this);
+		bindMethodContext(this, "onChange");
 	}
 
 	static fromJSON(id, payload) {
@@ -42,7 +43,7 @@ export default class Checklist {
 		let item = node["checklist-item"];
 		item.done = !!target.checked;
 
-		replaceNode(node, item.render("li")); // XXX: slightly hacky due to tag name
+		replaceNode(node, item.render(node.nodeName));
 
 		// TODO: `ev.stopPropagation()` for encapsulation?
 		let payload = {

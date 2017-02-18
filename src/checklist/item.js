@@ -1,13 +1,12 @@
 import { dispatchEvent, replaceNode, createElement } from "../dom";
+import { bindMethodContext } from "../util";
 
 export default class ChecklistItem {
 	constructor(desc, done) {
 		this.desc = desc;
 		this.done = !!done;
 
-		this.onEdit = this.onEdit.bind(this);
-		this.onSave = this.onSave.bind(this);
-		this.onChange = this.onChange.bind(this);
+		bindMethodContext(this, "onEdit", "onSave", "onChange");
 	}
 
 	static fromJSON(payload) {

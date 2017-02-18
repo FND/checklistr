@@ -20,7 +20,7 @@ function init() {
 			});
 
 			document.body.addEventListener("checklist-update", function(ev) {
-				let { id, state } = ev.detail
+				let { id, state } = ev.detail;
 				store.update(id, state);
 			});
 		});
