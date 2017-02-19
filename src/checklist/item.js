@@ -1,4 +1,4 @@
-import { dispatchEvent, replaceNode, createElement } from "../dom";
+import { dispatchEvent, replaceNode, createElement as dom } from "../dom";
 import { bindMethodContext } from "../util";
 
 export default class ChecklistItem {
@@ -20,22 +20,29 @@ export default class ChecklistItem {
 		};
 	}
 
-	render(tag, editMode) {
+	render(tag) {
+		// suppress re-rendering in edit mode to avoid discarding transient UI
+		// state -- XXX: special-casing
+		if(this.editMode && this.node.querySelector("input[type=text]")) {
+			return this.node;
+		}
+
+		let { node } = this;
+		tag = tag || node.nodeName;
+
 		let cls = "checklist-item";
 		let params = {
-			class: this.done ? cls + " done" : cls,
-			"checklist-item": this // XXX: memory leak?
+			class: this.done ? `${cls} done` : cls
 		};
 
-		let dom = createElement;
-		if(editMode) {
+		if(this.editMode) {
 			let form = dom("form", null, [
 				dom("input", { type: "text", value: this.desc }),
 				dom("button", null, "💾 save")
 			]);
 
 			form.addEventListener("submit", this.onSave);
-			return dom(tag, params, form);
+			this.node = dom(tag, params, form);
 		} else {
 			let btn = dom("button", null, "✎ edit");
 			let field = dom("label", null, [
@@ -45,25 +52,39 @@ export default class ChecklistItem {
 
 			field.addEventListener("change", this.onChange);
 			btn.addEventListener("click", this.onEdit);
-			return dom(tag, params, [field, btn]);
+			this.node = dom(tag, params, [field, btn]);
 		}
+
+		if(node) { // refresh
+			replaceNode(node, this.node);
+		}
+		return this.node;
 	}
 
 	onEdit(ev) {
-		let btn = ev.target;
-		let el = btn.closest(".checklist-item");
-
-		replaceNode(el, this.render(el.nodeName, true));
+		this.editMode = true;
+		this.render();
 	}
 
 	onSave(ev) {
-		let field = ev.target.closest(".checklist-item"). // TODO: DRY
-			querySelector("input[type=text]");
-		this.desc = field.value;
-		this.onChange(ev); // XXX: slighly hacky
+		let desc = this.node.querySelector("input[type=text]").value;
+		this.editMode = false;
+		if(desc === this.desc) {
+			this.render();
+		} else {
+			this.desc = desc;
+			this.update();
+		}
 	}
 
 	onChange(ev) {
-		dispatchEvent(ev.target, "checklist-item-update", this, { bubbles: true });
+		let { target } = ev;
+		this.done = !!target.checked;
+		this.update();
+	}
+
+	update() {
+		this.render();
+		dispatchEvent(this.node, "checklist-item-update", this, { bubbles: true });
 	}
 }
