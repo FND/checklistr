@@ -35,24 +35,29 @@ export default class ChecklistItem {
 			class: this.done ? `${cls} done` : cls
 		};
 
+		let refs = {};
 		if(this.editMode) {
-			let form = dom("form", null, [
-				dom("input", { type: "text", value: this.desc }),
-				dom("button", null, "💾 save")
+			this.node = dom(tag, params, [
+				dom("form", { ref: [refs, "form"] }, [
+					dom("input", { type: "text", value: this.desc }),
+					dom("button", null, "💾 save")
+				])
 			]);
-
-			form.addEventListener("submit", this.onSave);
-			this.node = dom(tag, params, form);
+			refs.form.addEventListener("submit", this.onSave);
 		} else {
-			let btn = dom("button", null, "✎ edit");
-			let field = dom("label", null, [
-				dom("input", { type: "checkbox", checked: !!this.done }),
-				this.desc
+			this.node = dom(tag, params, [
+				dom("label", null, [
+					dom("input", {
+						type: "checkbox",
+						checked: !!this.done,
+						ref: [refs, "cbox"]
+					}),
+					this.desc
+				]),
+				dom("button", { ref: [refs, "btn"] }, "✎ edit")
 			]);
-
-			field.addEventListener("change", this.onChange);
-			btn.addEventListener("click", this.onEdit);
-			this.node = dom(tag, params, [field, btn]);
+			refs.cbox.addEventListener("change", this.onChange);
+			refs.btn.addEventListener("click", this.onEdit);
 		}
 
 		if(node) { // refresh

@@ -25,14 +25,13 @@ export default class Checklist {
 	}
 
 	render() {
-		let btn = dom("button", null, "⊕ add");
+		let refs = {};
 		let el = dom("section", { class: "checklist" }, [
 			dom("h3", { id: "checklist-" + this.id }, this.caption),
 			dom("ol", null, this.items.map(item => item.render("li"))),
-			btn
+			dom("button", { ref: [refs, "btn"] }, "⊕ add")
 		]);
-
-		btn.addEventListener("click", this.onAdd);
+		refs.btn.addEventListener("click", this.onAdd);
 		el.addEventListener("checklist-item-update", this.onChange);
 
 		if(this.node) { // refresh
