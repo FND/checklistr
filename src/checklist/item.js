@@ -1,5 +1,7 @@
-import { dispatchEvent, replaceNode, createElement as dom } from "../dom";
-import { bindMethodContext } from "../util";
+import { dispatchEvent } from "uitil/dom/events";
+import { replaceNode } from "uitil/dom";
+import { createElement as dom } from "uitil/dom/create";
+import bindMethodContext from "uitil/method_context";
 
 export default class ChecklistItem {
 	constructor(desc, done) {

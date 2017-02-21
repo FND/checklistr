@@ -5,6 +5,7 @@
     "compile": "rollup --config"
   },
   "dependencies": {
+    "uitil": "^1.0.2",
     "whatwg-fetch": "^2.0.2"
   },
   "devDependencies": {
